@@ -1,6 +1,7 @@
 import { Restaurant } from '@/types/restaurant';
 import fs from 'fs';
 import path from 'path';
+import { syncToMultipleDestinations } from './sync-data';
 
 const DATA_FILE = path.join(process.cwd(), 'data', 'restaurants.json');
 
@@ -25,7 +26,13 @@ export async function getRestaurants(): Promise<Restaurant[]> {
 
 export async function saveRestaurants(restaurants: Restaurant[]): Promise<void> {
   try {
+    // メインファイルに保存
     fs.writeFileSync(DATA_FILE, JSON.stringify(restaurants, null, 2));
+    
+    // 複数の場所に自動同期（非同期でバックグラウンド実行）
+    syncToMultipleDestinations(restaurants).catch(error => {
+      console.error('同期エラー（メイン保存は成功）:', error);
+    });
   } catch (error) {
     console.error('Failed to save restaurants:', error);
   }

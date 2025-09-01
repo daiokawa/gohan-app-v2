@@ -124,16 +124,20 @@ export default function Home() {
       });
     }
     
-    // ソート: 営業中 + 距離
+    // ソート: 閉店直前 > 営業中 > 時間外（各カテゴリ内で距離順）
     return filtered.sort((a, b) => {
-      const aOpen = isRestaurantOpen(a, currentTime);
-      const bOpen = isRestaurantOpen(b, currentTime);
+      const aStatus = getRestaurantStatus(a, currentTime);
+      const bStatus = getRestaurantStatus(b, currentTime);
       
-      // 営業中の店舗を優先
-      if (aOpen && !bOpen) return -1;
-      if (!aOpen && bOpen) return 1;
+      // 1. 閉店直前の店舗を最優先
+      if (aStatus.isClosingSoon && !bStatus.isClosingSoon) return -1;
+      if (!aStatus.isClosingSoon && bStatus.isClosingSoon) return 1;
       
-      // 両方営業中または両方時間外の場合、距離でソート（近い順）
+      // 2. 営業中の店舗を次に優先
+      if (aStatus.isOpen && !bStatus.isOpen) return -1;
+      if (!aStatus.isOpen && bStatus.isOpen) return 1;
+      
+      // 3. 同じカテゴリ内では距離でソート（近い順）
       if (userLocation && 'distance' in a && 'distance' in b) {
         if (a.distance !== undefined && b.distance !== undefined) {
           return a.distance - b.distance;

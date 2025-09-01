@@ -148,6 +148,10 @@ export default function EditRestaurant() {
       });
 
       if (res.ok) {
+        // 本番環境の場合、GitHubへの自動同期を通知
+        if (typeof window !== 'undefined' && window.location.hostname === 'gohan.ahillchan.com') {
+          alert('✅ 更新を保存しました！\n\n⚠️ 本番環境への反映には約1-2分かかります。\n自動的にGitHubと同期され、Vercelが再デプロイします。');
+        }
         router.push('/');
       } else {
         alert('店舗の更新に失敗しました');

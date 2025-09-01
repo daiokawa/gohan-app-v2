@@ -129,6 +129,29 @@ export default function EditRestaurant() {
     // Google Maps URLを自動生成（空の場合）
     const mapsUrl = googleMapsUrl || `https://maps.google.com/?q=${encodeURIComponent(name + (address ? ' ' + address : ''))}`;
     
+    // 座標を設定
+    let coordinates = restaurant.coordinates;
+    if (latitude && longitude) {
+      coordinates = { lat: latitude, lng: longitude };
+    } else if (!coordinates && address) {
+      // 座標がない場合は自動取得を試みる
+      try {
+        const res = await fetch('/api/geocode-gsi', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ address }),
+        });
+        if (res.ok) {
+          const data = await res.json();
+          if (data.latitude && data.longitude) {
+            coordinates = { lat: data.latitude, lng: data.longitude };
+          }
+        }
+      } catch (error) {
+        console.error('座標取得エラー:', error);
+      }
+    }
+    
     const updatedRestaurant: Restaurant = {
       ...restaurant,
       name,
@@ -136,8 +159,7 @@ export default function EditRestaurant() {
       address,
       category: '',
       businessHours,
-      latitude,
-      longitude,
+      coordinates,
     };
 
     try {

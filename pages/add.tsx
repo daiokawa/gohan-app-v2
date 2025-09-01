@@ -63,6 +63,35 @@ export default function AddRestaurant() {
     // Google Maps URLを自動生成（入力がない場合）
     const mapsUrl = googleMapsUrl || `https://maps.google.com/?q=${encodeURIComponent(name + (address ? ' ' + address : ''))}`;
     
+    // 住所から座標を自動取得
+    let coordinates = undefined;
+    if (address) {
+      try {
+        const res = await fetch('/api/geocode-gsi', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ address }),
+        });
+        if (res.ok) {
+          const data = await res.json();
+          if (data.latitude && data.longitude) {
+            coordinates = { lat: data.latitude, lng: data.longitude };
+            console.log(`座標取得成功: ${name}`, coordinates);
+          }
+        }
+      } catch (error) {
+        console.error('座標取得エラー:', error);
+      }
+    }
+    
+    // 座標が取得できなかった場合は小倉駅周辺のデフォルト座標
+    if (!coordinates) {
+      coordinates = {
+        lat: 33.8850 + (Math.random() - 0.5) * 0.02,
+        lng: 130.8836 + (Math.random() - 0.5) * 0.02
+      };
+    }
+    
     const newRestaurant: Restaurant = {
       id: Date.now().toString(),
       name,
@@ -70,6 +99,7 @@ export default function AddRestaurant() {
       address,
       category: '',
       businessHours,
+      coordinates,
     };
 
     try {

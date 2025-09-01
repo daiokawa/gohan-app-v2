@@ -131,8 +131,12 @@ export default function EditRestaurant() {
 
     setLoading(true);
     
-    // Google Maps URLを自動生成（空の場合）
-    const mapsUrl = googleMapsUrl || `https://maps.google.com/?q=${encodeURIComponent(name + (address ? ' ' + address : ''))}`;
+    // Google Maps URLを処理（既存のURLがある場合はそれを維持）
+    let mapsUrl = googleMapsUrl;
+    if (!mapsUrl && name) {
+      // 空の場合のみ自動生成
+      mapsUrl = `https://maps.google.com/?q=${encodeURIComponent(name + (address ? ' ' + address : ''))}`;
+    }
     
     // 座標を設定
     let coordinates = restaurant.coordinates;

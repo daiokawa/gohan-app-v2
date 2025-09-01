@@ -222,6 +222,17 @@ export default function EditRestaurant() {
       </Head>
 
       <main className="container mx-auto px-4 py-8 max-w-4xl">
+        {typeof window !== 'undefined' && window.location.hostname === 'gohan.ahillchan.com' && (
+          <div className="mb-4 p-4 bg-yellow-100 border-2 border-yellow-600 rounded">
+            <p className="text-sm font-bold text-yellow-800">
+              ⚠️ 本番環境での編集は制限されています
+            </p>
+            <p className="text-xs text-yellow-700 mt-1">
+              データの編集・削除はローカル環境（http://localhost:3000）で行い、GitHubにプッシュしてください。
+            </p>
+          </div>
+        )}
+      
         <div className="p-6" style={{
           backgroundColor: '#d0d0d0',
           border: '3px solid #000',

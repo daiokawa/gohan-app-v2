@@ -21,18 +21,25 @@ export default function Home() {
 
   const loadRestaurants = async () => {
     try {
-      const res = await fetch('/api/restaurants');
+      // キャッシュバスター付きでAPIを取りに行く（必ず最新を取得）
+      const res = await fetch(`/api/restaurants?ts=${Date.now()}`);
       if (res.ok) {
         const data = await res.json();
         setRestaurants(data);
+        // APIが成功したらlocalStorageを更新
         localStorage.setItem('restaurants', JSON.stringify(data));
+      } else {
+        throw new Error('API response not ok');
       }
     } catch (error) {
-      console.error('Failed to load restaurants:', error);
-      // localStorageから復元
+      console.error('Failed to load restaurants from API:', error);
+      // APIが失敗した時だけlocalStorageから復元
       const saved = localStorage.getItem('restaurants');
       if (saved) {
+        console.log('Using cached data from localStorage');
         setRestaurants(JSON.parse(saved));
+      } else {
+        setRestaurants([]);
       }
     } finally {
       setLoading(false);

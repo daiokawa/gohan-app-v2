@@ -1,15 +1,15 @@
 =========================================
 🍚 Gohan Auto Backup Starting...
-Time: 2025-09-01 15:00:00
+Time: 2025-09-01 19:00:01
 =========================================
 📊 Found 50 restaurants to backup
-✅ Backed up to: /Users/KoichiOkawa/Documents/gohan-backups/2025-09-01/restaurants_20250901_150001.json
+✅ Backed up to: /Users/KoichiOkawa/Documents/gohan-backups/2025-09-01/restaurants_20250901_190002.json
 ln: /Users/KoichiOkawa/Documents/gohan-backups/restaurants_latest.json: Operation not permitted
-✅ Backed up to: /Users/KoichiOkawa/Desktop/gohan-backups/2025-09-01/restaurants_20250901_150001.json
+✅ Backed up to: /Users/KoichiOkawa/Desktop/gohan-backups/2025-09-01/restaurants_20250901_190002.json
 ln: /Users/KoichiOkawa/Desktop/gohan-backups/restaurants_latest.json: Operation not permitted
-✅ Backed up to: /Users/KoichiOkawa/ahillchan.com/gohan-backups/2025-09-01/restaurants_20250901_150001.json
-✅ Backed up to: /Users/KoichiOkawa/gohan-app-v2/backups/2025-09-01/restaurants_20250901_150001.json
-✅ Backed up to: /Users/KoichiOkawa/Library/Mobile Documents/com~apple~CloudDocs/gohan-backups/2025-09-01/restaurants_20250901_150001.json
+✅ Backed up to: /Users/KoichiOkawa/ahillchan.com/gohan-backups/2025-09-01/restaurants_20250901_190002.json
+✅ Backed up to: /Users/KoichiOkawa/gohan-app-v2/backups/2025-09-01/restaurants_20250901_190002.json
+✅ Backed up to: /Users/KoichiOkawa/Library/Mobile Documents/com~apple~CloudDocs/gohan-backups/2025-09-01/restaurants_20250901_190002.json
 ln: /Users/KoichiOkawa/Library/Mobile Documents/com~apple~CloudDocs/gohan-backups/restaurants_latest.json: Operation not permitted
 
 🧹 Cleaning old backups (keeping last 7 days)...

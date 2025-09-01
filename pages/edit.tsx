@@ -175,11 +175,15 @@ export default function EditRestaurant() {
       });
 
       if (res.ok) {
+        // 全件を取り直してlocalStorageを最新版に更新
+        const refreshed = await fetch(`/api/restaurants?ts=${Date.now()}`).then(r => r.json());
+        localStorage.setItem('restaurants', JSON.stringify(refreshed));
+        
         // 本番環境の場合、GitHubへの自動同期を通知
         if (typeof window !== 'undefined' && window.location.hostname === 'gohan.ahillchan.com') {
           alert('✅ 更新を保存しました！\n\n⚠️ 本番環境への反映には約1-2分かかります。\n自動的にGitHubと同期され、Vercelが再デプロイします。');
         }
-        router.push('/');
+        router.replace(`/?refresh=${Date.now()}`);
       } else {
         alert('店舗の更新に失敗しました');
       }
@@ -231,7 +235,10 @@ export default function EditRestaurant() {
                   try {
                     const res = await fetch(`/api/restaurants?id=${id}`, { method: 'DELETE' });
                     if (res.ok) {
-                      router.push('/');
+                      // 全件を取り直してlocalStorageを最新版に更新
+                      const refreshed = await fetch(`/api/restaurants?ts=${Date.now()}`).then(r => r.json());
+                      localStorage.setItem('restaurants', JSON.stringify(refreshed));
+                      router.replace(`/?refresh=${Date.now()}`);
                     } else {
                       alert('削除に失敗しました');
                     }

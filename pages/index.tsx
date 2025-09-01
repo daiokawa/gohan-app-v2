@@ -228,6 +228,66 @@ export default function Home() {
             >
               + 店舗追加
             </button>
+            <button
+              onClick={async () => {
+                if (confirm('全店舗の座標を一括更新しますか？\n（住所がある店舗のみ）')) {
+                  let updated = 0;
+                  let failed = 0;
+                  const updatedRestaurants = [];
+                  
+                  for (const restaurant of restaurants) {
+                    if (restaurant.address && !restaurant.coordinates) {
+                      try {
+                        const res = await fetch('/api/geocode-gsi', {
+                          method: 'POST',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify({ address: restaurant.address }),
+                        });
+                        if (res.ok) {
+                          const data = await res.json();
+                          if (data.latitude && data.longitude) {
+                            restaurant.coordinates = { lat: data.latitude, lng: data.longitude };
+                            updated++;
+                          } else {
+                            failed++;
+                          }
+                        } else {
+                          failed++;
+                        }
+                      } catch (error) {
+                        failed++;
+                      }
+                    }
+                    updatedRestaurants.push(restaurant);
+                  }
+                  
+                  // 更新されたデータを保存
+                  if (updated > 0) {
+                    await fetch('/api/restaurants', {
+                      method: 'PUT',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify(updatedRestaurants),
+                    });
+                    alert(`座標更新完了！\n✅ 成功: ${updated}件\n❌ 失敗: ${failed}件`);
+                    window.location.reload();
+                  } else {
+                    alert('更新対象がありませんでした');
+                  }
+                }
+              }}
+              className="px-4 py-2 font-bold"
+              style={{
+                backgroundColor: '#4080c0',
+                color: '#ffffff',
+                border: '3px solid #000',
+                borderTopColor: '#80c0ff',
+                borderLeftColor: '#80c0ff',
+                borderRightColor: '#204060',
+                borderBottomColor: '#204060'
+              }}
+            >
+              座標一括取得
+            </button>
           </div>
           {userLocation && (
             <div className="text-sm text-gray-600">

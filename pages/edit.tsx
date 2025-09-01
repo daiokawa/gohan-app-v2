@@ -45,8 +45,11 @@ export default function EditRestaurant() {
           setGoogleMapsUrl(found.googleMapsUrl || '');
           setAddress(found.address || '');
           setBusinessHours(found.businessHours || {});
-          setLatitude(found.latitude);
-          setLongitude(found.longitude);
+          // coordinatesから座標を読み取る
+          if (found.coordinates) {
+            setLatitude(found.coordinates.lat);
+            setLongitude(found.coordinates.lng);
+          }
         }
       }
     } catch (error) {

@@ -30,11 +30,10 @@ export async function syncToMultipleDestinations(restaurants: Restaurant[]): Pro
     console.log('GitHubプッシュをスキップ（変更なしまたはオフライン）');
   }
   
-  // 4. 複数のバックアップ場所にもコピー
+  // 4. 複数のバックアップ場所にもコピー（シンボリックリンクは作らない）
   const backupLocations = [
     path.join(process.env.HOME || '', 'Documents', 'gohan-backups'),
     path.join(process.env.HOME || '', 'Desktop', 'gohan-backups'),
-    path.join(process.env.HOME || '', 'gohan-app-v2', 'backups'),
   ];
   
   for (const location of backupLocations) {
@@ -43,6 +42,7 @@ export async function syncToMultipleDestinations(restaurants: Restaurant[]): Pro
         fs.mkdirSync(location, { recursive: true });
       }
       const destPath = path.join(location, 'restaurants_latest.json');
+      // 通常のファイルとして書き込み（シンボリックリンクは使わない）
       fs.writeFileSync(destPath, jsonData);
     } catch (error) {
       console.log(`バックアップ先 ${location} への保存をスキップ`);

@@ -1,6 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { Restaurant } from '@/types/restaurant';
-import { getRestaurants, addRestaurant, updateRestaurant, deleteRestaurant, saveRestaurants } from '@/lib/kv';
+import { getRestaurants, addRestaurant, updateRestaurant, deleteRestaurant, saveRestaurants } from '@/lib/json-db';
 
 export default async function handler(
   req: NextApiRequest,

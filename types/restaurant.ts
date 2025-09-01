@@ -24,4 +24,8 @@ export interface Restaurant {
   closedDays?: string[];
   latitude?: number;
   longitude?: number;
+  coordinates?: {
+    lat: number;
+    lng: number;
+  };
 }

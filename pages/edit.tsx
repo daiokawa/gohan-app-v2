@@ -236,18 +236,25 @@ export default function EditRestaurant() {
               type="button"
               onClick={async () => {
                 if (confirm('この店舗を削除してもよろしいですか？\n削除すると元に戻せません。')) {
+                  console.log('削除開始 - ID:', id, '店舗名:', restaurant?.name);
                   try {
                     const res = await fetch(`/api/restaurants?id=${id}`, { method: 'DELETE' });
+                    console.log('削除APIレスポンス:', res.status, res.ok);
                     if (res.ok) {
                       // 全件を取り直してlocalStorageを最新版に更新
                       const refreshed = await fetch(`/api/restaurants?ts=${Date.now()}`).then(r => r.json());
+                      console.log('削除後の店舗数:', refreshed.length);
                       localStorage.setItem('restaurants', JSON.stringify(refreshed));
+                      alert('削除完了しました');
                       router.replace(`/?refresh=${Date.now()}`);
                     } else {
-                      alert('削除に失敗しました');
+                      const errorText = await res.text();
+                      console.error('削除失敗:', errorText);
+                      alert('削除に失敗しました: ' + errorText);
                     }
                   } catch (error) {
-                    alert('削除に失敗しました');
+                    console.error('削除エラー:', error);
+                    alert('削除に失敗しました: ' + (error as Error).message);
                   }
                 }
               }}

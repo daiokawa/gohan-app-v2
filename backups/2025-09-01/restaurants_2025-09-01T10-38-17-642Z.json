@@ -4,7 +4,7 @@
     "name": "ナマステブッダ到津",
     "address": "福岡県北九州市小倉北区下到津4-9-2",
     "googleMapsUrl": "https://maps.google.com/?q=ナマステブッダ到津",
-    "category": "カレー",
+    "category": "ネパール料理",
     "businessHours": {
       "monday": [
         {
@@ -2914,61 +2914,6 @@
     "coordinates": {
       "lat": 33.88268886905402,
       "lng": 130.87386537794617
-    }
-  },
-  {
-    "id": "shiroya-bakery",
-    "name": "シロヤベーカリー 小倉店",
-    "address": "福岡県北九州市小倉北区京町2-6-14",
-    "googleMapsUrl": "https://maps.google.com/?q=シロヤベーカリー小倉店",
-    "category": "カフェ",
-    "businessHours": {
-      "monday": [
-        {
-          "open": "08:00",
-          "close": "20:00"
-        }
-      ],
-      "tuesday": [
-        {
-          "open": "08:00",
-          "close": "20:00"
-        }
-      ],
-      "wednesday": [
-        {
-          "open": "08:00",
-          "close": "20:00"
-        }
-      ],
-      "thursday": [
-        {
-          "open": "08:00",
-          "close": "20:00"
-        }
-      ],
-      "friday": [
-        {
-          "open": "08:00",
-          "close": "20:00"
-        }
-      ],
-      "saturday": [
-        {
-          "open": "08:00",
-          "close": "20:00"
-        }
-      ],
-      "sunday": [
-        {
-          "open": "08:00",
-          "close": "20:00"
-        }
-      ]
-    },
-    "coordinates": {
-      "lat": 33.876647380479604,
-      "lng": 130.89048706828586
     }
   }
 ]

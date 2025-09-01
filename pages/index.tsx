@@ -340,7 +340,7 @@ export default function Home() {
                     {status.isOpen && status.closeTime && (
                       <span className="text-xs text-gray-600">
                         {status.closeTime}まで
-                        {status.isClosingSoon && ' 🏃=3'}
+                        {status.isClosingSoon && <span className="font-bold text-red-600"> 🏃=3</span>}
                       </span>
                     )}
                     {!status.isOpen && status.openTime && (

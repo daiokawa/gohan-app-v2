@@ -21,6 +21,7 @@ export default function EditRestaurant() {
   const [name, setName] = useState('');
   const [googleMapsUrl, setGoogleMapsUrl] = useState('');
   const [address, setAddress] = useState('');
+  const [category, setCategory] = useState('');
   const [businessHours, setBusinessHours] = useState<BusinessHours>({});
   const [latitude, setLatitude] = useState<number | undefined>();
   const [longitude, setLongitude] = useState<number | undefined>();
@@ -44,6 +45,7 @@ export default function EditRestaurant() {
           setName(found.name);
           setGoogleMapsUrl(found.googleMapsUrl || '');
           setAddress(found.address || '');
+          setCategory(found.category || '');
           setBusinessHours(found.businessHours || {});
           // coordinatesから座標を読み取る
           if (found.coordinates) {
@@ -160,7 +162,7 @@ export default function EditRestaurant() {
       name,
       googleMapsUrl: mapsUrl,
       address,
-      category: '',
+      category,
       businessHours,
       coordinates,
     };
@@ -274,6 +276,24 @@ export default function EditRestaurant() {
               />
             </div>
 
+            <div>
+              <label className="block text-sm font-medium mb-2">カテゴリー</label>
+              <input
+                type="text"
+                value={category}
+                onChange={(e) => setCategory(e.target.value)}
+                className="w-full px-3 py-2"
+                style={{
+                  backgroundColor: '#ffffff',
+                  border: '2px solid #000',
+                  borderTopColor: '#606060',
+                  borderLeftColor: '#606060',
+                  borderRightColor: '#ffffff',
+                  borderBottomColor: '#ffffff'
+                }}
+                placeholder="例: カレー、うどん、ラーメン"
+              />
+            </div>
 
             <div>
               <label className="block text-sm font-medium mb-2">住所</label>

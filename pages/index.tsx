@@ -131,20 +131,9 @@ export default function Home() {
       });
     }
     
-    // ソート: 閉店直前 > 営業中 > 時間外（各カテゴリ内で距離順）
+    // ソート: 距離順のみ（営業状態での優先順位は表示時に分離するため不要）
     return filtered.sort((a, b) => {
-      const aStatus = getRestaurantStatus(a, currentTime);
-      const bStatus = getRestaurantStatus(b, currentTime);
-      
-      // 1. 閉店直前の店舗を最優先
-      if (aStatus.isClosingSoon && !bStatus.isClosingSoon) return -1;
-      if (!aStatus.isClosingSoon && bStatus.isClosingSoon) return 1;
-      
-      // 2. 営業中の店舗を次に優先
-      if (aStatus.isOpen && !bStatus.isOpen) return -1;
-      if (!aStatus.isOpen && bStatus.isOpen) return 1;
-      
-      // 3. 同じカテゴリ内では距離でソート（近い順）
+      // 距離でソート（近い順）
       if (userLocation && 'distance' in a && 'distance' in b) {
         if (a.distance !== undefined && b.distance !== undefined) {
           return a.distance - b.distance;
@@ -169,7 +158,7 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-gray-300" style={{ backgroundColor: '#c0c0c0' }}>
       <Head>
-        <title>🍚 Gohan - 近所の飲食店</title>
+        <title>開いてるお店🍚 - 近所の飲食店</title>
         <meta name="description" content="毎日使う近所の飲食店情報" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
@@ -183,7 +172,7 @@ export default function Home() {
           borderRightColor: '#004040',
           borderBottomColor: '#004040'
         }}>
-          <h1 className="text-3xl font-bold text-white mb-2" style={{ fontFamily: 'serif' }}>🍚 Gohan</h1>
+          <h1 className="text-3xl font-bold text-white mb-2" style={{ fontFamily: 'serif' }}>開いてるお店🍚</h1>
           <p className="text-white font-semibold">近所の飲食店 • 現在: {currentTime.toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' })}</p>
         </header>
 
@@ -235,76 +224,26 @@ export default function Home() {
             >
               + 店舗追加
             </button>
-            <button
-              onClick={async () => {
-                if (confirm('全店舗の座標を一括更新しますか？\n（住所がある店舗のみ）')) {
-                  let updated = 0;
-                  let failed = 0;
-                  const updatedRestaurants = [];
-                  
-                  for (const restaurant of restaurants) {
-                    if (restaurant.address && !restaurant.coordinates) {
-                      try {
-                        const res = await fetch('/api/geocode-gsi', {
-                          method: 'POST',
-                          headers: { 'Content-Type': 'application/json' },
-                          body: JSON.stringify({ address: restaurant.address }),
-                        });
-                        if (res.ok) {
-                          const data = await res.json();
-                          if (data.latitude && data.longitude) {
-                            restaurant.coordinates = { lat: data.latitude, lng: data.longitude };
-                            updated++;
-                          } else {
-                            failed++;
-                          }
-                        } else {
-                          failed++;
-                        }
-                      } catch (error) {
-                        failed++;
-                      }
-                    }
-                    updatedRestaurants.push(restaurant);
-                  }
-                  
-                  // 更新されたデータを保存
-                  if (updated > 0) {
-                    await fetch('/api/restaurants', {
-                      method: 'PUT',
-                      headers: { 'Content-Type': 'application/json' },
-                      body: JSON.stringify(updatedRestaurants),
-                    });
-                    alert(`座標更新完了！\n✅ 成功: ${updated}件\n❌ 失敗: ${failed}件`);
-                    window.location.reload();
-                  } else {
-                    alert('更新対象がありませんでした');
-                  }
-                }
-              }}
-              className="px-4 py-2 font-bold"
-              style={{
-                backgroundColor: '#4080c0',
-                color: '#ffffff',
-                border: '3px solid #000',
-                borderTopColor: '#80c0ff',
-                borderLeftColor: '#80c0ff',
-                borderRightColor: '#204060',
-                borderBottomColor: '#204060'
-              }}
-            >
-              座標一括取得
-            </button>
           </div>
           {userLocation && (
             <div className="text-sm text-gray-600">
               現在地から距離順に表示中
+              <span className="text-xs ml-2">
+                (緯度: {userLocation.lat.toFixed(4)}, 経度: {userLocation.lng.toFixed(4)})
+              </span>
             </div>
           )}
         </div>
 
+        {/* 営業中の店舗 */}
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-          {filteredRestaurants.map(restaurant => {
+          {(() => {
+            const openRestaurants = filteredRestaurants.filter(r => getRestaurantStatus(r, currentTime).isOpen);
+            // 閉店直前の店舗を先に、その後距離順で残りの営業中店舗
+            const closingSoon = openRestaurants.filter(r => getRestaurantStatus(r, currentTime).isClosingSoon);
+            const notClosingSoon = openRestaurants.filter(r => !getRestaurantStatus(r, currentTime).isClosingSoon);
+            return [...closingSoon, ...notClosingSoon];
+          })().map(restaurant => {
             const status = getRestaurantStatus(restaurant, currentTime);
             return (
               <div
@@ -327,37 +266,182 @@ export default function Home() {
               >
                 <div className="mb-2">
                   <h3 className="text-sm font-semibold text-gray-800 mb-1">{restaurant.name}</h3>
-                  <div className="flex items-center gap-1 flex-wrap">
-                    <span 
-                      className="px-2 py-0.5 text-xs font-bold"
-                      style={{
-                        backgroundColor: status.isOpen ? '#008080' : '#808080',
-                        color: '#ffffff',
-                        border: '1px solid #000000'
-                      }}>
-                      {status.isOpen ? '営業中' : '時間外'}
-                    </span>
-                    {status.isOpen && status.closeTime && (
-                      <span className="text-xs text-gray-600">
-                        {status.closeTime}まで
-                        {status.isClosingSoon && <><span className="text-base"> 🏃</span>=3</>}
+                  <div className="flex items-center justify-between gap-1 flex-wrap">
+                    <div className="flex items-center gap-1">
+                      <span 
+                        className="px-2 py-0.5 text-xs font-bold"
+                        style={{
+                          backgroundColor: status.isOpen ? '#008080' : '#808080',
+                          color: '#ffffff',
+                          border: '1px solid #000000'
+                        }}>
+                        {status.isOpen ? '営業中' : '時間外'}
                       </span>
-                    )}
-                    {!status.isOpen && status.openTime && (
-                      <span className="text-xs text-gray-600">
-                        {status.openDay === 'today' ? status.openTime : 
-                         status.openDay === 'tomorrow' ? `明日${status.openTime}` :
-                         status.openTime}開店
+                      {status.isOpen && status.closeTime && (
+                        <span className="text-xs text-gray-600">
+                          {status.closeTime}まで
+                          {status.isClosingSoon && <><span className="text-lg"> 🏃</span>=3</>}
+                        </span>
+                      )}
+                      {!status.isOpen && status.openTime && (
+                        <span className="text-xs text-gray-600">
+                          {status.openDay === 'today' ? status.openTime : 
+                           status.openDay === 'tomorrow' ? `明日${status.openTime}` :
+                           status.openTime}開店
+                        </span>
+                      )}
+                    </div>
+                    {'distance' in restaurant && restaurant.distance !== undefined && (
+                      <span className="text-xs text-gray-700">
+                        📍{restaurant.distance < 1 
+                          ? `${Math.round(restaurant.distance * 1000)}m` 
+                          : `${restaurant.distance.toFixed(1)}km`}
                       </span>
                     )}
                   </div>
-                  {'distance' in restaurant && restaurant.distance !== undefined && (
-                    <div className="text-xs text-gray-700 mt-1">
-                      📍 {restaurant.distance < 1 
-                        ? `${Math.round(restaurant.distance * 1000)}m` 
-                        : `${restaurant.distance.toFixed(1)}km`}
-                    </div>
+                </div>
+                
+                <div className="flex gap-1 mt-2">
+                  {restaurant.googleMapsUrl && (
+                    <a
+                      href={restaurant.googleMapsUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex-1 px-2 py-1 text-xs text-center font-semibold"
+                      style={{
+                        backgroundColor: '#a0a0a0',
+                        color: '#000000',
+                        border: '2px solid #000',
+                        borderTopColor: '#ffffff',
+                        borderLeftColor: '#ffffff',
+                        borderRightColor: '#606060',
+                        borderBottomColor: '#606060'
+                      }}
+                    >
+                      地図
+                    </a>
                   )}
+                  <button
+                    onClick={() => window.location.href = `/edit?id=${restaurant.id}`}
+                    className="flex-1 px-2 py-1 text-xs font-semibold"
+                    style={{
+                      backgroundColor: '#a0a0a0',
+                      color: '#000000',
+                      border: '2px solid #000',
+                      borderTopColor: '#ffffff',
+                      borderLeftColor: '#ffffff',
+                      borderRightColor: '#606060',
+                      borderBottomColor: '#606060'
+                    }}
+                  >
+                    編集
+                  </button>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+        
+        {/* 閉店中の店舗との区切り線 */}
+        {filteredRestaurants.filter(r => !getRestaurantStatus(r, currentTime).isOpen).length > 0 && 
+         filteredRestaurants.filter(r => getRestaurantStatus(r, currentTime).isOpen).length > 0 && (
+          <div className="my-6">
+            <hr style={{
+              border: 'none',
+              borderTop: '2px solid #808080',
+              borderBottom: '1px solid #ffffff',
+              height: '3px'
+            }} />
+          </div>
+        )}
+        
+        {/* 閉店中の店舗 */}
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+          {filteredRestaurants
+            .filter(r => !getRestaurantStatus(r, currentTime).isOpen)
+            .sort((a, b) => {
+              // 次の開店時間で並び替え
+              const aStatus = getRestaurantStatus(a, currentTime);
+              const bStatus = getRestaurantStatus(b, currentTime);
+              
+              // 両方に開店時間がある場合
+              if (aStatus.openTime && bStatus.openTime) {
+                // 同じ日の開店時間で比較
+                if (aStatus.openDay === bStatus.openDay) {
+                  return aStatus.openTime.localeCompare(bStatus.openTime);
+                }
+                // 今日 > 明日 > その他
+                if (aStatus.openDay === 'today') return -1;
+                if (bStatus.openDay === 'today') return 1;
+                if (aStatus.openDay === 'tomorrow') return -1;
+                if (bStatus.openDay === 'tomorrow') return 1;
+              }
+              
+              // 開店時間がない場合は距離でソート
+              if ('distance' in a && 'distance' in b) {
+                if (a.distance !== undefined && b.distance !== undefined) {
+                  return a.distance - b.distance;
+                }
+              }
+              
+              return 0;
+            })
+            .map(restaurant => {
+            const status = getRestaurantStatus(restaurant, currentTime);
+            return (
+              <div
+                key={restaurant.id}
+                className={`p-3 transition-all ${
+                  status.isOpen 
+                    ? 'bg-teal-100' 
+                    : 'bg-gray-200'
+                }`}
+                style={{
+                  border: '2px solid #000',
+                  borderRightWidth: '3px',
+                  borderBottomWidth: '3px',
+                  borderTopColor: '#ffffff',
+                  borderLeftColor: '#ffffff',
+                  borderRightColor: status.isOpen ? '#004040' : '#606060',
+                  borderBottomColor: status.isOpen ? '#004040' : '#606060',
+                  backgroundColor: status.isOpen ? '#b0d0d0' : '#d0d0d0'
+                }}
+              >
+                <div className="mb-2">
+                  <h3 className="text-sm font-semibold text-gray-800 mb-1">{restaurant.name}</h3>
+                  <div className="flex items-center justify-between gap-1 flex-wrap">
+                    <div className="flex items-center gap-1">
+                      <span 
+                        className="px-2 py-0.5 text-xs font-bold"
+                        style={{
+                          backgroundColor: status.isOpen ? '#008080' : '#808080',
+                          color: '#ffffff',
+                          border: '1px solid #000000'
+                        }}>
+                        {status.isOpen ? '営業中' : '時間外'}
+                      </span>
+                      {status.isOpen && status.closeTime && (
+                        <span className="text-xs text-gray-600">
+                          {status.closeTime}まで
+                          {status.isClosingSoon && <><span className="text-lg"> 🏃</span>=3</>}
+                        </span>
+                      )}
+                      {!status.isOpen && status.openTime && (
+                        <span className="text-xs text-gray-600">
+                          {status.openDay === 'today' ? status.openTime : 
+                           status.openDay === 'tomorrow' ? `明日${status.openTime}` :
+                           status.openTime}開店
+                        </span>
+                      )}
+                    </div>
+                    {'distance' in restaurant && restaurant.distance !== undefined && (
+                      <span className="text-xs text-gray-700">
+                        📍{restaurant.distance < 1 
+                          ? `${Math.round(restaurant.distance * 1000)}m` 
+                          : `${restaurant.distance.toFixed(1)}km`}
+                      </span>
+                    )}
+                  </div>
                 </div>
                 
                 <div className="flex gap-1 mt-2">

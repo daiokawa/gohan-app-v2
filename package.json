@@ -10,9 +10,12 @@
     "backup": "node scripts/backup-restaurants.js"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.57.0",
     "@upstash/redis": "^1.35.3",
+    "dotenv": "^17.2.1",
     "next": "15.5.2",
     "next-auth": "^4.24.11",
+    "node-fetch": "^3.3.2",
     "react": "19.1.0",
     "react-dom": "19.1.0"
   },

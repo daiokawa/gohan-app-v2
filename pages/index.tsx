@@ -98,7 +98,7 @@ export default function Home() {
         setGettingLocation(false);
       },
       {
-        enableHighAccuracy: false,
+        enableHighAccuracy: true,
         timeout: 30000,
         maximumAge: 0
       }
